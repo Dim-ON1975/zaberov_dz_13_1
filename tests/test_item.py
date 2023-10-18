@@ -1,6 +1,9 @@
 """Здесь надо написать тесты с использованием pytest для модуля item."""
+import os
+from csv import DictReader
 
 import pytest
+from typing import Union
 
 from src.item import Item
 
@@ -11,7 +14,7 @@ from src.item import Item
     ('Фотобумага', 600.25, 30, 18007.50),
     ('Флеш-накопитель', 345.15, 63, 21744.45),
 ])
-def test_calculate_total_price(name: str, price: float, quantity: int, result: float):
+def test_calculate_total_price(name: str, price: float, quantity: int, result: float) -> None:
     """
     Тестирование метода класса calculate_total_price(),
     рассчитывающего общую стоимость товаров в магазине.
@@ -34,7 +37,7 @@ def test_calculate_total_price(name: str, price: float, quantity: int, result: f
     ('Фотобумага', 600.25, 30, 0.85, 510.21),
     ('Флеш-накопитель', 345.15, 63, 0.97, 334.80),
 ])
-def test_apply_discount(name: str, price: float, quantity: int, pay_r: float, result: float):
+def test_apply_discount(name: str, price: float, quantity: int, pay_r: float, result: float) -> None:
     """
     Тестирование метода класса calculate_total_price(),
     рассчитывающего общую стоимость товаров в магазине.
@@ -64,7 +67,7 @@ def test_apply_discount(name: str, price: float, quantity: int, pay_r: float, re
     ('Фотобумага', 600.25, 30),
     ('Флеш-накопитель', 345.15, 63),
 ])
-def test_apply_discount_1(name: str, price: float, quantity: int):
+def test_apply_discount_1(name: str, price: float, quantity: int) -> None:
     """
     Тестирование функции apply_discount,
     не возвращающей значение.
@@ -86,7 +89,7 @@ def test_apply_discount_1(name: str, price: float, quantity: int):
     ('Фотобумага', 600.25, 30, 15),
     ('Флеш-накопитель', 345.15, 63, 16),
 ])
-def test_item_all(name: str, price: float, quantity: int, result: float):
+def test_item_all(name: str, price: float, quantity: int, result: float) -> None:
     """
     Тестирование количества созданных объектов.
     :param name: Наименование товара, str.
@@ -100,3 +103,50 @@ def test_item_all(name: str, price: float, quantity: int, result: float):
 
     # Тестируем экземпляр класса Operation
     assert len(Item.all) == result
+
+
+def test_name() -> None:
+    """Тестирование сеттера"""
+    item = Item('Телефон', 10000, 5)
+    item.name = 'Смартфон'
+    assert item.name == 'Смартфон'
+    item.name = 'СуперСмартфон'
+    assert item.name == 'СуперСмарт'
+
+
+def test_instantiate_from_csv() -> None:
+    """Тестирование функции"""
+    path = os.path.join('..', 'tests', 'items.csv')
+    Item.instantiate_from_csv(path)  # создание объектов из данных файла
+    # Количество в файле корректных записей с данными по товарам
+    assert len(Item.all) == 5
+
+    # Первый экземпляр класса с наименованием "Смартфон"
+    item1 = Item.all[0]
+    assert item1.name == 'Смартфон'
+
+    # В файле 7 записей с данными по товарам
+    csv_list = []
+    with open(path, mode='r') as csvfile:
+        # Считываем данные из файла в список.
+        reader = DictReader(csvfile)
+        for row in reader:
+            csv_l = [row['name'], row['price'], row['quantity']]
+            csv_list.append(csv_l)
+    assert len(csv_list) == 8
+
+
+@pytest.mark.parametrize('num, name_row, result', [
+    ('5', 'Количество', 5),
+    ('5.0', 'Количество', 5),
+    ('5.5', 'Количество', 5),
+    ('1025.5', 'Стоимость', 1025.5),
+    ('1025.0', 'Стоимость', 1025),
+    ('Ошибка', 'Стоимость', 0),
+    ('Ошибка', 'Количество', 0)
+])
+def test_string_to_number(num: str, name_row: str, result: Union[int, str]) -> None:
+    """
+    Тестирование функции преобразования целого или вещественного числа из числа-строки
+    """
+    assert Item.string_to_number(num, name_row) == result
