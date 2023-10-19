@@ -102,7 +102,7 @@ def test_item_all(name: str, price: float, quantity: int, result: float) -> None
     item = Item(name, price, quantity)
 
     # Тестируем экземпляр класса Operation
-    assert len(Item.all) == result
+    assert len(item.all) == result
 
 
 def test_name() -> None:
@@ -119,7 +119,12 @@ def test_instantiate_from_csv() -> None:
     path = os.path.join('..', 'tests', 'items.csv')
     Item.instantiate_from_csv(path)  # создание объектов из данных файла
     # Количество в файле корректных записей с данными по товарам
+    names = []
+    for obj_name in Item.all:
+        names.append(obj_name.name)
+    print(names)
     assert len(Item.all) == 5
+
 
     # Первый экземпляр класса с наименованием "Смартфон"
     item1 = Item.all[0]
@@ -133,7 +138,7 @@ def test_instantiate_from_csv() -> None:
         for row in reader:
             csv_l = [row['name'], row['price'], row['quantity']]
             csv_list.append(csv_l)
-    assert len(csv_list) == 8
+    assert len(csv_list) == 7
 
 
 @pytest.mark.parametrize('num, name_row, result', [

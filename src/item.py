@@ -9,6 +9,7 @@ class Item:
     pay_rate = 1.0
     all = []
 
+
     def __init__(self, name: str, price: float, quantity: int) -> None:
         """
         Создание экземпляра класса item.
@@ -77,8 +78,6 @@ class Item:
                 # то создаём новый экземпляр класса
                 if price != 0 and quantity != 0:
                     item = cls(name, price, quantity)
-                # Добавляем экземпляр класса в список,
-                # предварительно проверив его наличие среди товаров.
                 if item not in cls.all:
                     cls.all.append(item)
 
