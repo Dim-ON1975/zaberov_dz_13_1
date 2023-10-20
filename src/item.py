@@ -9,7 +9,6 @@ class Item:
     pay_rate = 1.0
     all = []
 
-
     def __init__(self, name: str, price: float, quantity: int) -> None:
         """
         Создание экземпляра класса item.
@@ -22,7 +21,7 @@ class Item:
         self.quantity = quantity
 
         # Добавляем экземпляр класса в список
-        Item.all.append(self)
+        # Item.all.append(self)
 
     def calculate_total_price(self) -> float:
         """
@@ -78,8 +77,19 @@ class Item:
                 # то создаём новый экземпляр класса
                 if price != 0 and quantity != 0:
                     item = cls(name, price, quantity)
+                # Добавляем объект в список,
+                # если он не содержит эквивалентного ему объекта.
                 if item not in cls.all:
                     cls.all.append(item)
+
+    def __eq__(self, other):
+        # сравнение двух экземпляров класса
+        if isinstance(other, Item):
+            return (self.name == other.name and
+                    self.price == other.price and
+                    self.quantity == other.quantity)
+        # иначе возвращаем NotImplemented
+        return NotImplemented
 
     @staticmethod
     def string_to_number(str_num: str, str_row: str = 'Количество') -> Union[int, float]:

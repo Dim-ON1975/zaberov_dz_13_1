@@ -84,10 +84,10 @@ def test_apply_discount_1(name: str, price: float, quantity: int) -> None:
 
 
 @pytest.mark.parametrize('name, price, quantity,  result', [
-    ('Смартфон', 10000, 20, 13),
-    ('Ноутбук', 20000, 5, 14),
-    ('Фотобумага', 600.25, 30, 15),
-    ('Флеш-накопитель', 345.15, 63, 16),
+    ('Смартфон', 10000, 20, 0),
+    ('Ноутбук', 20000, 5, 0),
+    ('Фотобумага', 600.25, 30, 0),
+    ('Флеш-накопитель', 345.15, 63, 0),
 ])
 def test_item_all(name: str, price: float, quantity: int, result: float) -> None:
     """
@@ -125,12 +125,11 @@ def test_instantiate_from_csv() -> None:
     print(names)
     assert len(Item.all) == 5
 
-
     # Первый экземпляр класса с наименованием "Смартфон"
     item1 = Item.all[0]
     assert item1.name == 'Смартфон'
 
-    # В файле 7 записей с данными по товарам
+    # В файле 8 записей с данными по товарам
     csv_list = []
     with open(path, mode='r') as csvfile:
         # Считываем данные из файла в список.
@@ -138,7 +137,7 @@ def test_instantiate_from_csv() -> None:
         for row in reader:
             csv_l = [row['name'], row['price'], row['quantity']]
             csv_list.append(csv_l)
-    assert len(csv_list) == 7
+    assert len(csv_list) == 8
 
 
 @pytest.mark.parametrize('num, name_row, result', [
