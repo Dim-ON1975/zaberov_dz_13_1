@@ -116,7 +116,7 @@ def test_name() -> None:
 
 def test_instantiate_from_csv() -> None:
     """Тестирование функции"""
-    path = os.path.join('..', 'tests', 'items.csv')
+    path = os.path.join(os.path.dirname(__file__), 'items.csv')
     Item.instantiate_from_csv(path)  # создание объектов из данных файла
     # Количество в файле корректных записей с данными по товарам
     names = []
@@ -154,3 +154,12 @@ def test_string_to_number(num: str, name_row: str, result: Union[int, str]) -> N
     Тестирование функции преобразования целого или вещественного числа из числа-строки
     """
     assert Item.string_to_number(num, name_row) == result
+
+
+def test_repr_str():
+    """
+    Тесты __repr__ и __str__
+    """
+    item1 = Item("Смартфон", 10000, 20)
+    assert repr(item1) == "Item('Смартфон', 10000, 20)"
+    assert str(item1) == 'Смартфон'
