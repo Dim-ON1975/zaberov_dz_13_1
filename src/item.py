@@ -1,3 +1,4 @@
+import os
 from csv import DictReader
 from typing import Union
 
@@ -56,15 +57,16 @@ class Item:
         self.__name = name
 
     @classmethod
-    def instantiate_from_csv(cls, path: str):
+    def instantiate_from_csv(cls, file_path: str) -> None:
         """
         Получение данных из файла .csv.
         Создание на основе полученных данных экземпляров класса.
         Добавление экземпляров класса в список объектов класса.
         """
+        path = os.path.join(os.path.dirname(__file__), '..', file_path)
         # "Обнуляем" список экземпляров класса
         cls.all = []
-        with open(path, mode='r') as csvfile:
+        with open(path, mode='r', encoding='windows-1251', newline='') as csvfile:
             # Считываем данные из файла в словарь.
             reader = DictReader(csvfile)
             # Перебираем полученные данные,
@@ -114,3 +116,9 @@ class Item:
             # else:
             #     print(f'Не корректное количество. {str_row} = 0')
             return num
+
+    def __str__(self) -> str:
+        return self.name
+
+    def __repr__(self) -> str:
+        return f"{self.__class__.__name__}('{self.name}', {self.price}, {self.quantity})"
