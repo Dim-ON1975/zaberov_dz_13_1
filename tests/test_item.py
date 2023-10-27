@@ -6,6 +6,7 @@ import pytest
 from typing import Union
 
 from src.item import Item
+from src.phone import Phone
 
 
 @pytest.mark.parametrize('name, price, quantity, result', [
@@ -154,6 +155,24 @@ def test_string_to_number(num: str, name_row: str, result: Union[int, str]) -> N
     Тестирование функции преобразования целого или вещественного числа из числа-строки
     """
     assert Item.string_to_number(num, name_row) == result
+
+
+def test_add():
+    # смартфон iPhone 14, цена 120_000, количество товара 5, симкарт 2
+    phone1 = Phone("iPhone 14", 120_000, 5, 2)
+    assert phone1.number_of_sim == 2
+
+    item1 = Item("Смартфон", 10000, 20)
+    assert item1 + phone1 == 25
+    assert phone1 + phone1 == 10
+
+    # тестирование операции сложения атрибута экземпляра класса и числа
+    with pytest.raises(ValueError) as exif:
+        str(item1 + 20)
+    assert "Складывать можно только объекты Item и дочерние от них." in str(exif.value)
+    with pytest.raises(ValueError) as exif:
+        str(phone1 + 20)
+    assert "Складывать можно только объекты Item и дочерние от них." in str(exif.value)
 
 
 def test_repr_str():
