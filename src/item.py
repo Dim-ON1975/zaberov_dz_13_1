@@ -117,6 +117,14 @@ class Item:
             #     print(f'Не корректное количество. {str_row} = 0')
             return num
 
+    def __add__(self, other):
+        """
+        Сложение количества товаров класса Item и дочерних подклассов
+        """
+        if not isinstance(other, Item):
+            raise ValueError('Складывать можно только объекты Item и дочерние от них.')
+        return self.quantity + other.quantity
+
     def __str__(self) -> str:
         return self.name
 
