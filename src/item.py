@@ -3,6 +3,16 @@ from csv import DictReader
 from typing import Union
 
 
+class InstantiateCSVError(Exception):
+    """Класс исключения при повреждении файла"""
+
+    def __init__(self, *args, **kwargs):
+        self.message = args[0] if args else 'Файл повреждён.'
+
+    def __str__(self):
+        return self.message
+
+
 class Item:
     """
     Класс для представления товара в магазине.
@@ -58,7 +68,7 @@ class Item:
         self.__name = name
 
     @classmethod
-    def instantiate_from_csv(cls, file_path: str) -> None:
+    def instantiate_from_csv(cls, file_path: str = 'src/item.csv') -> str:
         """
         Получение данных из файла .csv.
         Создание на основе полученных данных экземпляров класса.
@@ -67,23 +77,47 @@ class Item:
         path = os.path.join(os.path.dirname(__file__), '..', file_path)
         # "Обнуляем" список экземпляров класса
         cls.all = []
-        with open(path, mode='r', encoding='windows-1251', newline='') as csvfile:
-            # Считываем данные из файла в словарь.
-            reader = DictReader(csvfile)
-            # Перебираем полученные данные,
-            # присваивая значения соответствующим переменным
-            for row in reader:
-                name = row['name']
-                price = cls.string_to_number(row['price'], 'Стоимость')
-                quantity = cls.string_to_number(row['quantity'], 'Количество')
-                # Если стоимость или количество не равны 0,
-                # то создаём новый экземпляр класса
-                if price != 0 and quantity != 0:
-                    item = cls(name, price, quantity)
-                # Добавляем объект в список,
-                # если он не содержит эквивалентного ему объекта.
-                if item not in cls.all:
-                    cls.all.append(item)
+        # Проверяем наличие файла .csv
+        try:
+            with open(path, mode='r', encoding='windows-1251', newline='') as csvfile:
+                # Считываем данные из файла в словарь.
+                reader = DictReader(csvfile)
+                # Перебираем полученные данные,
+                # присваивая значения соответствующим переменным.
+                # Проверяем наличие необходимых заголовков колонок.
+                if reader.fieldnames == ['name', 'price', 'quantity']:
+                    for row in reader:
+                        # Проверяем наличие данных в колонках.
+                        if not (row['name'] and row['price'] and row['quantity']) is None:
+                            name = row['name']
+                            price = cls.string_to_number(row['price'], 'Стоимость')
+                            quantity = cls.string_to_number(row['quantity'], 'Количество')
+                            # Если стоимость или количество не равны 0,
+                            # то создаём новый экземпляр класса
+                            if price != 0 and quantity != 0:
+                                item = cls(name, price, quantity)
+                            # Добавляем объект в список,
+                            # если он не содержит эквивалентного ему объекта.
+                            if item not in cls.all:
+                                cls.all.append(item)
+                        else:
+                            raise InstantiateCSVError(f'Файл {cls.file_name(file_path)} повреждён.')
+                else:
+                    raise InstantiateCSVError(f'Файл {cls.file_name(file_path)} повреждён.')
+        except FileNotFoundError:
+            raise FileNotFoundError(f'Отсутствует файл {cls.file_name(file_path)}.')
+
+    @staticmethod
+    def file_name(path):
+        """
+        Получение имени файла из полного имени, включающего путь к файлу
+        """
+        if '/' in path:
+            file = path.split('/')[-1]
+        else:
+            indexes = [i for i, c in enumerate(path) if c == '\\']
+            file = path[indexes[-1] + 1:]
+        return file
 
     def __eq__(self, other):
         # сравнение двух экземпляров класса
@@ -92,7 +126,7 @@ class Item:
                     self.price == other.price and
                     self.quantity == other.quantity)
         # иначе возвращаем NotImplemented
-        return NotImplemented
+        # return NotImplemented
 
     @staticmethod
     def string_to_number(str_num: str, str_row: str = 'Количество') -> Union[int, float]:

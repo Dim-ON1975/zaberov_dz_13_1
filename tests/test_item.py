@@ -5,7 +5,7 @@ from csv import DictReader
 import pytest
 from typing import Union
 
-from src.item import Item
+from src.item import Item, InstantiateCSVError
 from src.phone import Phone
 
 
@@ -123,7 +123,6 @@ def test_instantiate_from_csv() -> None:
     names = []
     for obj_name in Item.all:
         names.append(obj_name.name)
-    print(names)
     assert len(Item.all) == 5
 
     # Первый экземпляр класса с наименованием "Смартфон"
@@ -139,6 +138,27 @@ def test_instantiate_from_csv() -> None:
             csv_l = [row['name'], row['price'], row['quantity']]
             csv_list.append(csv_l)
     assert len(csv_list) == 8
+
+    # Тестирование проверки наличия файла
+    # Файл item_3.csv отсутствует.
+    path_1 = os.path.join(os.path.dirname(__file__), 'item_3.csv')
+    with pytest.raises(FileNotFoundError) as exif:
+        Item.instantiate_from_csv(path_1)
+    assert str(exif.value) == 'Отсутствует файл item_3.csv.'
+
+    # Тестирование проверки повреждения файла
+    # Файл item_1.csv повреждён (нет одного из заголовков колонок).
+    path_2 = os.path.join(os.path.dirname(__file__), 'item_1.csv')
+    with pytest.raises(InstantiateCSVError) as exif:
+        Item.instantiate_from_csv(path_2)
+    assert str(exif.value) == 'Файл item_1.csv повреждён.'
+
+    # Тестирование проверки повреждения файла
+    # Файл item_2.csv повреждён (нет данных в третьей колонке в некоторых строках).
+    path_3 = os.path.join(os.path.dirname(__file__), '..', 'tests/item_2.csv')
+    with pytest.raises(InstantiateCSVError) as exif:
+        Item.instantiate_from_csv(path_3)
+    assert str(exif.value) == 'Файл item_2.csv повреждён.'
 
 
 @pytest.mark.parametrize('num, name_row, result', [
